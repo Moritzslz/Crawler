@@ -1,0 +1,14 @@
+{
+  "user_agent": "M",
+  "crawl_method" : 3,
+  "headless": false,
+  "disable_cache": true,
+  "input_file_name": "example.csv",
+  "input_file_type": 1,
+  "output_file_name": "example",
+  "output_sheet_name": "font_data",
+  "css_selectors_to_extract": ["h1", "p", "a", ".exampleClass", "#exampleId"],
+  "start_url": "example.com",
+  "termination_index": 500,
+  "forbidden_keywords": ["facebook", "youtube", "some.sub-url-of-the-website-com", "github", "example-keyword"]
+}
