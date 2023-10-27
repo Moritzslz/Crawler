@@ -10,5 +10,6 @@
   "css_selectors_to_extract": ["h1", "p", "a", ".exampleClass", "#exampleId"],
   "start_url": "example.com",
   "termination_index": 500,
-  "forbidden_keywords": ["facebook", "youtube", "some.sub-url-of-the-website-com", "github", "example-keyword"]
+  "forbidden_keywords": ["facebook", "youtube", "some.sub-url-of-the-website-com", "github", "example-keyword"],
+  "included_keywords": ["some.sub-url-of-the-website-com", "example.com"]
 }

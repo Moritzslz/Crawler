@@ -33,7 +33,8 @@ The configuration for the web crawling process is stored in a JSON file named co
 - css_selectors_to_extract: Define CSS selectors to extract data from web pages.
 - start_url: Set the starting URL for recursive crawling.
 - termination_index: Specify the maximum number of pages to crawl recursively. (Advised maximum: 1000)
-- forbidden_keywords: Define a list of keywords that, if found in a URL, should be excluded from crawling. (only for recursive crawling)
+- forbidden_keywords: Define a list of keywords that, when detected in a URL during recursive crawling, will result in excluding that URL from the crawl. (only for recursive crawling)
+- included_keywords: Define a list of keywords that must be present in a discovered URL to initiate the crawling process during recursive crawling. (only for recursive crawling)
 
 **Usage**
 
@@ -49,7 +50,8 @@ To use this web crawler, follow these steps:
 - Recursive Crawling (Method 1): This method starts at a specified URL and recursively crawls linked pages, stopping when the termination index is reached or when no more links are available.
 - Iterative Crawling (Method 2): This method iteratively crawls a list of URLs provided in the input file. 
 - Analyze Fonts (Method 3): This method analyzes web fonts used on the provided URLs and extracts information about the fonts.
-- Extract Assets (Method 4): This method extracts web assets (e.g., images, scripts, styles) and provides information about their size.
+- Extract Assets Iterative (Method 4): This method extracts web assets (e.g., images, scripts, styles) and provides information about their size.
+- Extract Assets Recursive (Method 5): This method extracts web assets (e.g., images, scripts, styles) and provides information about their size.
 
 **Sample Configuration**
 
@@ -66,7 +68,8 @@ Here is an example of a configuration in config.json:
   "css_selectors_to_extract": ["h1", "p", "a"],
   "start_url": "example.com",
   "termination_index": 500,
-  "forbidden_keywords": ["facebook", "youtube", "example-keyword"]
+  "forbidden_keywords": ["facebook", "youtube", "example-keyword"],
+  "included_keywords": ["some.sub.domain.com"]
 }
 
 **Additional Notes**

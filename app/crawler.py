@@ -49,18 +49,33 @@ def init_firefox_diver(headless, disable_cache, user_agent):
     return firefox_driver
 
 
-def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidden_keywords, termination_index,
+def get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords):
+    urls_to_crawl = []
+    all_a_tags = chrome_driver.find_elements(By.TAG_NAME, "a")
+    for a_tag in all_a_tags:
+        href = a_tag.get_attribute('href')
+        if forbidden_keywords:
+            if not any(keyword in href.lower() for keyword in forbidden_keywords):
+                if included_keywords:
+                    if any(keyword in href.lower() for keyword in included_keywords):
+                        urls_to_crawl.append(href)
+                else:
+                    urls_to_crawl.append(href)
+        else:
+            if included_keywords:
+                if any(keyword in href.lower() for keyword in included_keywords):
+                    urls_to_crawl.append(href)
+            else:
+                urls_to_crawl.append(href)
+
+    return urls_to_crawl
+
+
+def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidden_keywords, included_keywords, termination_index,
                         css_selectors_to_extract):
     chrome_driver = init_chrome_diver(headless, disable_cache, user_agent)
     urls_to_crawl = []
     index = 0
-
-    def get_all_children_urls():
-        all_a_tags = chrome_driver.find_elements(By.TAG_NAME, "a")
-        for a_tag in all_a_tags:
-            href = a_tag.get_attribute('href')
-            if not any(keyword in href.lower() for keyword in forbidden_keywords):
-                urls_to_crawl.append(href)
 
     def recursive_crawl(url):
         nonlocal index
@@ -71,7 +86,8 @@ def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidde
             chrome_driver.get(url)
             page_title = chrome_driver.title
 
-            get_all_children_urls()
+            new_urls_to_crawl = get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords)
+            urls_to_crawl.append(new_urls_to_crawl)
 
             for element_selector in css_selectors_to_extract:
                 elements_dict = {"URL": url, "Page title": page_title}
@@ -142,16 +158,18 @@ def crawl_iterative_css(headless, disable_cache, user_agent, urls, css_selectors
     log_text("Finished gracefully")
 
 
-def get_assets(headless, disable_cache, user_agent, urls):
+def get_single_asset_size(asset_url):
+    response = requests.get(asset_url)
+    return len(response.content)  # Size of the response content in bytes
+
+
+def scroll_down(chrome_driver):
+    chrome_driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+    time.sleep(1)
+
+
+def get_assets_iterative(headless, disable_cache, user_agent, urls):
     chrome_driver = init_chrome_diver(headless, disable_cache, user_agent)
-
-    def get_single_asset_size(asset_url):
-        response = requests.get(asset_url)
-        return len(response.content)  # Size of the response content in bytes
-
-    def scroll_down(chrome_driver):
-        chrome_driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(1)
 
     with open("../js/network_data.js", "r") as js_file:
         script = js_file.read()
@@ -190,6 +208,65 @@ def get_assets(headless, disable_cache, user_agent, urls):
             log_exception("Exception", url)
             asset_list.append(asset_dict)
             append_write_df(asset_list)
+
+    chrome_driver.quit()
+    log_text("Finished gracefully")
+
+
+def get_assets_recursive(headless, disable_cache, user_agent, start_url, forbidden_keywords, included_keywords, termination_index):
+    chrome_driver = init_chrome_diver(headless, disable_cache, user_agent)
+    urls_to_crawl = []
+    index = 0
+
+    with open("../js/network_data.js", "r") as js_file:
+        script = js_file.read()
+
+    def recursive_crawl(url):
+        nonlocal index
+        asset_list = []
+        global asset_dict
+        log_start(url)
+        try:
+            chrome_driver.get(url)
+            scroll_down(chrome_driver)
+            page_title = chrome_driver.title
+
+            new_urls_to_crawl = get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords)
+            urls_to_crawl.append(new_urls_to_crawl)
+
+            json_data = chrome_driver.execute_script(script)
+            asset_data = json.loads(json_data)
+
+            for entry in asset_data:
+                asset_dict = {"URL": url, "Page title": page_title}  # Creating new asset dict
+                asset_size = entry["Size"]
+                if asset_size == 0:
+                    asset_size = get_single_asset_size(entry["URL"])
+                asset_dict["Asset url"] = entry["URL"]
+                asset_dict["Asset type"] = entry["Type"]
+                asset_dict["Asset size in Byte"] = asset_size
+                asset_list.append(asset_dict)
+
+            log_url(url)
+            append_write_df(asset_list)
+            log_end(page_title)
+
+        except TimeoutException as e:
+            log_exception("TimeoutException", url)
+            asset_list.append(asset_dict)
+            append_write_df(asset_list)
+        except Exception as e:
+            log_exception("Exception", url)
+            asset_list.append(asset_dict)
+            append_write_df(asset_list)
+
+        if index < termination_index:
+            index += 1
+            next_url = urls_to_crawl.pop(0)
+            log_urls_to_crawl(urls_to_crawl)
+            recursive_crawl(next_url)
+
+    recursive_crawl(start_url)
 
     chrome_driver.quit()
     log_text("Finished gracefully")

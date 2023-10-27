@@ -63,14 +63,7 @@ if __name__ == '__main__':
     start_url = config["start_url"]
     termination_index = config["termination_index"]
     forbidden_keywords = config["forbidden_keywords"]
-
-    if crawl_method == Crawl.RECURSIVE.value:
-        crawl_recursive_css(headless, disable_cache, user_agent, start_url,
-                            forbidden_keywords, termination_index, css_selectors_to_extract)
-        close_log("crawl_recursive_url_log")
-        df = get_write_df()
-        print(df)
-        write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
+    included_keywords = config["included_keywords"]
 
     if crawl_method == Crawl.ITERATIVE.value:
         url_df = read_file(input_file_type, input_file_path, input_file_name)
@@ -81,11 +74,10 @@ if __name__ == '__main__':
         print(df)
         write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
 
-    if crawl_method == Crawl.ASSETS.value:
-        url_df = read_file(input_file_type, input_file_path, input_file_name)
-        urls = url_df["URL"]
-
-        get_assets(headless, disable_cache, user_agent, urls)
+    if crawl_method == Crawl.RECURSIVE.value:
+        crawl_recursive_css(headless, disable_cache, user_agent, start_url,
+                            forbidden_keywords, included_keywords, termination_index, css_selectors_to_extract)
+        close_log("crawl_recursive_url_log")
         df = get_write_df()
         print(df)
         write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
@@ -95,6 +87,23 @@ if __name__ == '__main__':
         urls = url_df["URL"]
 
         analyse_fonts(headless, disable_cache, user_agent, urls)
+        df = get_write_df()
+        print(df)
+        write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
+
+    if crawl_method == Crawl.ASSETS_ITERATIVE.value:
+        url_df = read_file(input_file_type, input_file_path, input_file_name)
+        urls = url_df["URL"]
+
+        get_assets_iterative(headless, disable_cache, user_agent, urls)
+        df = get_write_df()
+        print(df)
+        write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
+
+    if crawl_method == Crawl.ASSETS_RECURSIVE.value:
+        get_assets_recursive(headless, disable_cache, user_agent, start_url,
+                             forbidden_keywords, included_keywords, termination_index)
+        close_log("crawl_recursive_url_log")
         df = get_write_df()
         print(df)
         write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)

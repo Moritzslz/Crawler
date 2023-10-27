@@ -5,8 +5,9 @@ class Crawl(Enum):
     RECURSIVE = 1
     ITERATIVE = 2
     FONTS = 3
-    ASSETS = 4
-    TEST = 5
+    ASSETS_ITERATIVE = 4
+    ASSETS_RECURSIVE = 5
+    TEST = 6
 
 
 class FileTypes(Enum):
