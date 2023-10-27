@@ -49,26 +49,31 @@ def init_firefox_diver(headless, disable_cache, user_agent):
     return firefox_driver
 
 
-def get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords):
-    urls_to_crawl = []
+def get_all_children_urls(urls_to_crawl, chrome_driver, forbidden_keywords, included_keywords):
+    new_urls_to_crawl = []
     all_a_tags = chrome_driver.find_elements(By.TAG_NAME, "a")
     for a_tag in all_a_tags:
         href = a_tag.get_attribute('href')
-        if forbidden_keywords:
-            if not any(keyword in href.lower() for keyword in forbidden_keywords):
+        if href:
+            if forbidden_keywords:
+                if not any(keyword in href.lower() for keyword in forbidden_keywords):
+                    if included_keywords:
+                        if any(keyword in href.lower() for keyword in included_keywords):
+                            if href not in urls_to_crawl:
+                                new_urls_to_crawl.append(href)
+                    else:
+                        if href not in urls_to_crawl:
+                            new_urls_to_crawl.append(href)
+            else:
                 if included_keywords:
                     if any(keyword in href.lower() for keyword in included_keywords):
-                        urls_to_crawl.append(href)
+                        if href not in urls_to_crawl:
+                            new_urls_to_crawl.append(href)
                 else:
-                    urls_to_crawl.append(href)
-        else:
-            if included_keywords:
-                if any(keyword in href.lower() for keyword in included_keywords):
-                    urls_to_crawl.append(href)
-            else:
-                urls_to_crawl.append(href)
+                    if href not in urls_to_crawl:
+                        new_urls_to_crawl.append(href)
 
-    return urls_to_crawl
+    return new_urls_to_crawl
 
 
 def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidden_keywords, included_keywords, termination_index,
@@ -87,17 +92,18 @@ def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidde
             scroll_down(chrome_driver)
             page_title = chrome_driver.title
 
-            new_urls_to_crawl = get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords)
-            urls_to_crawl.append(new_urls_to_crawl)
+            new_urls_to_crawl = get_all_children_urls(urls_to_crawl, chrome_driver, forbidden_keywords, included_keywords)
+            urls_to_crawl.extend(new_urls_to_crawl)
 
             for element_selector in css_selectors_to_extract:
                 elements_dict = {"URL": url, "Page title": page_title}
                 elements = chrome_driver.find_elements(By.CSS_SELECTOR, element_selector)
-                elements_text = [element.text for element in elements]
-                if attribute_to_extract:
+                if attribute_to_extract.lower() == "text":
+                    elements_text = [element.text for element in elements]
+                    elements_dict[element_selector + " : Text"] = elements_text
+                if attribute_to_extract.lower():
                     attributes = [element.get_attribute(attribute_to_extract) for element in elements]
-                    elements_dict[attribute_to_extract] = attributes
-                elements_dict[element_selector] = elements_text
+                    elements_dict[element_selector + " : " + attribute_to_extract] = attributes
                 elements_dict["# " + element_selector + " elements"] = len(elements)
                 elements_list.append(elements_dict)
 
@@ -239,8 +245,8 @@ def get_assets_recursive(headless, disable_cache, user_agent, start_url, forbidd
             scroll_down(chrome_driver)
             page_title = chrome_driver.title
 
-            new_urls_to_crawl = get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords)
-            urls_to_crawl.append(new_urls_to_crawl)
+            new_urls_to_crawl = get_all_children_urls(urls_to_crawl, chrome_driver, forbidden_keywords, included_keywords)
+            urls_to_crawl.extend(new_urls_to_crawl)
 
             json_data = chrome_driver.execute_script(script)
             asset_data = json.loads(json_data)

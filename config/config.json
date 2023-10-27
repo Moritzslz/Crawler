@@ -1,6 +1,6 @@
 {
   "user_agent": "M",
-  "crawl_method" : 3,
+  "crawl_method" : 2,
   "headless": false,
   "disable_cache": true,
   "input_file_name": "example.csv",
