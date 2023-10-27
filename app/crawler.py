@@ -72,7 +72,7 @@ def get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords):
 
 
 def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidden_keywords, included_keywords, termination_index,
-                        css_selectors_to_extract):
+                        css_selectors_to_extract, attribute_to_extract):
     chrome_driver = init_chrome_diver(headless, disable_cache, user_agent)
     urls_to_crawl = []
     index = 0
@@ -84,6 +84,7 @@ def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidde
         log_start(url)
         try:
             chrome_driver.get(url)
+            scroll_down(chrome_driver)
             page_title = chrome_driver.title
 
             new_urls_to_crawl = get_all_children_urls(chrome_driver, forbidden_keywords, included_keywords)
@@ -93,6 +94,9 @@ def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidde
                 elements_dict = {"URL": url, "Page title": page_title}
                 elements = chrome_driver.find_elements(By.CSS_SELECTOR, element_selector)
                 elements_text = [element.text for element in elements]
+                if attribute_to_extract:
+                    attributes = [element.get_attribute(attribute_to_extract) for element in elements]
+                    elements_dict[attribute_to_extract] = attributes
                 elements_dict[element_selector] = elements_text
                 elements_dict["# " + element_selector + " elements"] = len(elements)
                 elements_list.append(elements_dict)
@@ -122,7 +126,7 @@ def crawl_recursive_css(headless, disable_cache, user_agent, start_url, forbidde
     log_text("Finished gracefully")
 
 
-def crawl_iterative_css(headless, disable_cache, user_agent, urls, css_selectors_to_extract):
+def crawl_iterative_css(headless, disable_cache, user_agent, urls, css_selectors_to_extract, attribute_to_extract):
     chrome_driver = init_chrome_diver(headless, disable_cache, user_agent)
 
     for url in urls:
@@ -131,12 +135,16 @@ def crawl_iterative_css(headless, disable_cache, user_agent, urls, css_selectors
         log_start(url)
         try:
             chrome_driver.get(url)
+            scroll_down(chrome_driver)
             page_title = chrome_driver.title
 
             for element_selector in css_selectors_to_extract:
                 elements_dict = {"URL": url, "Page title": page_title}
                 elements = chrome_driver.find_elements(By.CSS_SELECTOR, element_selector)
                 elements_text = [element.text for element in elements]
+                if attribute_to_extract:
+                    attributes = [element.get_attribute(attribute_to_extract) for element in elements]
+                    elements_dict[attribute_to_extract] = attributes
                 elements_dict[element_selector] = elements_text
                 elements_dict["# " + element_selector + " elements"] = len(elements)
                 elements_list.append(elements_dict)

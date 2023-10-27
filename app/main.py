@@ -10,7 +10,7 @@ if __name__ == '__main__':
     user_agent = UserAgents.MOZILLA.value
 
     # Reading the config file
-    with open("../config/config.json", "r") as config_file:
+    with open("../config/config_test.json", "r") as config_file:
         config = json.load(config_file)
 
     # Setting a user agent
@@ -58,6 +58,7 @@ if __name__ == '__main__':
 
     # setting css selectors to extract
     css_selectors_to_extract = config["css_selectors_to_extract"]
+    attribute_to_extract = config["attribute_to_extract"]
 
     # For crawling recursively
     start_url = config["start_url"]
@@ -65,19 +66,19 @@ if __name__ == '__main__':
     forbidden_keywords = config["forbidden_keywords"]
     included_keywords = config["included_keywords"]
 
-    if crawl_method == Crawl.ITERATIVE.value:
-        url_df = read_file(input_file_type, input_file_path, input_file_name)
-        urls = url_df["URL"]
-
-        crawl_iterative_css(headless, disable_cache, user_agent, urls, css_selectors_to_extract)
+    if crawl_method == Crawl.RECURSIVE.value:
+        crawl_recursive_css(headless, disable_cache, user_agent, start_url,
+                            forbidden_keywords, included_keywords, termination_index, css_selectors_to_extract, attribute_to_extract)
+        close_log("crawl_recursive_url_log")
         df = get_write_df()
         print(df)
         write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
 
-    if crawl_method == Crawl.RECURSIVE.value:
-        crawl_recursive_css(headless, disable_cache, user_agent, start_url,
-                            forbidden_keywords, included_keywords, termination_index, css_selectors_to_extract)
-        close_log("crawl_recursive_url_log")
+    if crawl_method == Crawl.ITERATIVE.value:
+        url_df = read_file(input_file_type, input_file_path, input_file_name)
+        urls = url_df["URL"]
+
+        crawl_iterative_css(headless, disable_cache, user_agent, urls, css_selectors_to_extract, attribute_to_extract)
         df = get_write_df()
         print(df)
         write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
@@ -109,9 +110,6 @@ if __name__ == '__main__':
         write_file(FileTypes.XLSX, output_file_path, output_file_name, output_sheet_name, df)
 
     if crawl_method == Crawl.TEST.value:
-        urls = ["https://www.bmw.de/de/index.html"]
+        print("Test")
 
-        analyse_fonts(headless, disable_cache, user_agent, urls)
-        df = get_write_df()
-        print(df)
-        write_file(FileTypes.XLSX, output_file_path, "test", "test_data", df)
+
