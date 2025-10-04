@@ -10,7 +10,7 @@ if __name__ == '__main__':
     user_agent = UserAgents.MOZILLA.value
 
     # Reading the config file
-    with open("../config/config_thais.json", "r") as config_file:
+    with open("../config/config.json", "r") as config_file:
         config = json.load(config_file)
 
     # Setting a user agent
