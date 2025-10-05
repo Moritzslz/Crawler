@@ -26,18 +26,20 @@ The crawler behavior is fully configurable via JSON. Key parameters include:
 ## PDF Extraction Rules
 The crawler will locate PDFs linked from pages and extract specific sections based on headings:
 ```json
-"pdf": {
-  "enabled": true,
-  "extract_rules": [
-    {
-      "heading": "Which Patients Are Eligible for Coverage?",
-      "capture": "paragraph"
-    },
-    {
-      "heading": "What Are the Conditions for Reimbursement?",
-      "capture": "paragraph"
-    }
-  ]
+{
+  "pdf": {
+    "enabled": true,
+    "extract_rules": [
+      {
+        "heading": "Which Patients Are Eligible for Coverage?",
+        "capture": "paragraph"
+      },
+      {
+        "heading": "What Are the Conditions for Reimbursement?",
+        "capture": "paragraph"
+      }
+    ]
+  }
 }
 ```
 
@@ -56,26 +58,38 @@ Extracted data, including parsed PDF sections, will be saved in the output/ dire
 
 ### Example Selectors
 ```json
-"selectors": [
-  {
-    "css": "table",
-    "type": "table",
-    "columns": [
-      "title", "brand_name", "generic_name", "files",
-      "therapeutic_area", "recommendation_type", "status",
-      "submission_date", "recommendation_date", "project_number"
-    ]
-  },
-  {
-    "css": "h1",
-    "type": "text",
-    "attributes": ["class"]
-  },
-  {
-    "css": "a",
-    "type": "text",
-    "attributes": ["href"]
-  }
-]
-
+{
+  "selectors": [
+    {
+      "css": "table",
+      "type": "table",
+      "columns": [
+        "title",
+        "brand_name",
+        "generic_name",
+        "files",
+        "therapeutic_area",
+        "recommendation_type",
+        "status",
+        "submission_date",
+        "recommendation_date",
+        "project_number"
+      ]
+    },
+    {
+      "css": "h1",
+      "type": "text",
+      "attributes": [
+        "class"
+      ]
+    },
+    {
+      "css": "a",
+      "type": "text",
+      "attributes": [
+        "href"
+      ]
+    }
+  ]
+}
 ```
