@@ -1,16 +1,72 @@
 {
-  "user_agent": "M",
-  "crawl_method" : 2,
+  "logging_level": "INFO",
+  "user_agent": "m",
   "headless": false,
   "disable_cache": true,
-  "input_file_name": "example.csv",
-  "input_file_type": 1,
-  "output_file_name": "example",
+  "crawl_method" : "i",
+  "analyse_assets": false,
+  "analyse_fonts": false,
+  "output_file_name": "output",
   "output_sheet_name": "crawl_data",
-  "css_selectors_to_extract": ["h1", "p", "a", ".exampleClass", "#exampleId"],
-  "attribute_to_extract": ["title"],
-  "start_url": "example.com",
-  "termination_index": 500,
-  "forbidden_keywords": ["facebook", "youtube", "some.sub-url-of-the-website-com", "github", "example-keyword"],
-  "included_keywords": ["some.sub-url-of-the-website-com", "example.com"]
+  "iterative": {
+    "input_file_name": "urls.csv",
+    "input_file_type": "csv"
+  },
+  "recursive": {
+    "start_url": "https://www.cda-amc.ca/find-reports",
+    "termination_index": 10,
+    "blacklist_keywords": [
+      "facebook",
+      "youtube",
+      "instagram"
+    ],
+    "whitelist_keywords": [
+      "https://www.cda-amc.ca/find-reports"
+    ]
+  },
+  "selectors": [
+    {
+      "css": "table",
+      "type": "table",
+      "columns": [
+        "title",
+        "brand_name",
+        "generic_name",
+        "files",
+        "therapeutic_area",
+        "recommendation_type",
+        "status",
+        "submission_date",
+        "recommendation_date",
+        "project_number"
+      ]
+    },
+    {
+      "css": "h1",
+      "type": "text",
+       "attributes": [
+        "class"
+      ]
+    },
+    {
+      "css": "a",
+      "type": "text",
+      "attributes": [
+        "href"
+      ]
+    }
+  ],
+  "pdf": {
+    "enabled": true,
+    "extract_rules": [
+      {
+        "heading": "Which Patients Are Eligible for Coverage?",
+        "capture": "paragraph"
+      },
+      {
+        "heading": "What Are the Conditions for Reimbursement?",
+        "capture": "paragraph"
+      }
+    ]
+  }
 }
