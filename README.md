@@ -1,4 +1,4 @@
-#Web Crawler Project
+# Web Crawler Project
 ## Introduction
 This project allows you to extract and analyze data from websites. It supports multiple crawling methods and can extract information both from HTML pages and linked PDF documents. Project Structure
 
@@ -40,15 +40,42 @@ The crawler will locate PDFs linked from pages and extract specific sections bas
   ]
 }
 ```
-##Usage
-Place input files in the input/ directory (e.g., urls.csv).
-Adjust settings in config/config.json as needed.
-Run the crawler:
-python main.py
-Extracted data, including parsed PDF sections, will be saved in the output/ directory under the file name specified in output_file_name.
-Crawl Methods
-Iterative Crawling (crawl_method: "i"): Crawl URLs listed in the input CSV file.
-Recursive Crawling (crawl_method: "r"): Crawl starting from a URL, following links recursively up to termination_index.
-Font Analysis: Disabled in this configuration.
-Asset Analysis: Disabled in this configuration.
-Example Selectors
+
+## Usage
+- Place input files in the input/ directory (e.g., urls.csv).
+- Adjust settings in config/config.json as needed.
+- You need to export and openAI api key for extracting pdfs
+### Run the crawler:
+- python main.py
+Extracted data, including parsed PDF sections, will be saved in the output/ directory under the file name specified in output_file_name. 
+#### Crawl Methods
+- Iterative Crawling (crawl_method: "i"): Crawl URLs listed in the input CSV file.
+- Recursive Crawling (crawl_method: "r"): Crawl starting from a URL, following links recursively up to termination_index.
+- Font Analysis: Disabled in this configuration.
+- Asset Analysis: Disabled in this configuration.
+
+### Example Selectors
+```json
+"selectors": [
+  {
+    "css": "table",
+    "type": "table",
+    "columns": [
+      "title", "brand_name", "generic_name", "files",
+      "therapeutic_area", "recommendation_type", "status",
+      "submission_date", "recommendation_date", "project_number"
+    ]
+  },
+  {
+    "css": "h1",
+    "type": "text",
+    "attributes": ["class"]
+  },
+  {
+    "css": "a",
+    "type": "text",
+    "attributes": ["href"]
+  }
+]
+
+```
